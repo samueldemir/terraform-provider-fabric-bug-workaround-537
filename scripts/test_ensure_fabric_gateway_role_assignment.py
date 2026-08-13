@@ -1,0 +1,36 @@
+
+# NOTE: YOu can run the script locally by adding the required PARAMS
+
+from ensure_fabric_gateway_role_assignment import ensure_assignment
+
+
+# Local dev test values.
+# Run `az login` first; locally the helper falls back to Azure CLI auth.
+TENANT_ID = "<TOADD>"
+CLIENT_ID = "<TOADD>"
+
+# Fill these manually before running.
+GATEWAY_ID = "<TOADD>"
+
+# Use these for dev
+SERVICE_PRINCIPALS = {
+    "dataproduct": "<TOADD>",
+    "datapipelines": "<TOADD>"
+}
+
+
+def main():
+    for name, principal_id in SERVICE_PRINCIPALS.items():
+        print(f"Ensuring gateway Admin role for {name}: {principal_id}")
+        ensure_assignment(
+            gateway_id=GATEWAY_ID,
+            principal_id=principal_id,
+            principal_type="ServicePrincipal",
+            role="Admin",
+            tenant_id=TENANT_ID,
+            client_id=CLIENT_ID,
+        )
+
+
+if __name__ == "__main__":
+    main()
