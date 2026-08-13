@@ -1,0 +1,1 @@
+WORKAROUND FOR https://github.com/microsoft/terraform-provider-fabric/issues/537
