@@ -20,16 +20,29 @@ SERVICE_PRINCIPALS = {
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--delete", action="store_true", help="Delete the test gateway role assignments.")
+    args = parser.parse_args()
+
     for name, principal_id in SERVICE_PRINCIPALS.items():
-        print(f"Ensuring gateway Admin role for {name}: {principal_id}")
-        ensure_assignment(
-            gateway_id=GATEWAY_ID,
-            principal_id=principal_id,
-            principal_type="ServicePrincipal",
-            role="Admin",
-            tenant_id=TENANT_ID,
-            client_id=CLIENT_ID,
-        )
+        if args.delete:
+            print(f"Deleting gateway Admin role for {name}: {principal_id}")
+            delete_assignment(
+                gateway_id=GATEWAY_ID,
+                principal_id=principal_id,
+                tenant_id=TENANT_ID,
+                client_id=CLIENT_ID,
+            )
+        else:
+            print(f"Ensuring gateway Admin role for {name}: {principal_id}")
+            ensure_assignment(
+                gateway_id=GATEWAY_ID,
+                principal_id=principal_id,
+                principal_type="ServicePrincipal",
+                role="Admin",
+                tenant_id=TENANT_ID,
+                client_id=CLIENT_ID,
+            )
 
 
 if __name__ == "__main__":

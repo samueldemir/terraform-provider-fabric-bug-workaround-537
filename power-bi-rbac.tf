@@ -36,4 +36,23 @@ resource "terraform_data" "sp_gateway_roles" {
       self.triggers_replace.client_id,
     ])
   }
+
+  provisioner "local-exec" {
+    when = destroy
+
+    command = join(" ", [
+      "python3",
+      "-u", # sichtbarkeit der stdout im tf apply
+      "${path.module}/scripts/ensure_fabric_gateway_role_assignment.py",
+      "--delete",
+      "--gateway-id",
+      self.triggers_replace.gateway_id,
+      "--principal-id",
+      self.triggers_replace.principal_id,
+      "--tenant-id",
+      self.triggers_replace.tenant_id,
+      "--client-id",
+      self.triggers_replace.client_id,
+    ])
+  }
 }

@@ -186,25 +186,59 @@ def ensure_assignment(gateway_id, principal_id, principal_type, role, tenant_id,
     raise RuntimeError(f"Failed to create gateway role assignment: HTTP {status}: {json.dumps(payload)}")
 
 
+def delete_assignment(gateway_id, principal_id, tenant_id, client_id):
+    print(
+        f"Deleting Fabric gateway role assignment: "
+        f"gateway_id={gateway_id}, principal_id={principal_id}",
+        flush=True,
+    )
+    token = get_access_token(tenant_id, client_id)
+
+    assignment = find_assignment(list_assignments(gateway_id, token), principal_id)
+    if not assignment:
+        print(f"Gateway role assignment for {principal_id} does not exist.", flush=True)
+        return
+
+    assignment_id = assignment["id"]
+    url = (
+        f"{FABRIC_API}/gateways/{urllib.parse.quote(gateway_id)}"
+        f"/roleAssignments/{urllib.parse.quote(assignment_id)}"
+    )
+    status, payload = request("DELETE", url, token)
+    if status not in (200, 202, 204):
+        raise RuntimeError(
+            f"Failed to delete gateway role assignment {assignment_id}: "
+            f"HTTP {status}: {json.dumps(payload)}"
+        )
+
+    print(f"Deleted gateway role assignment for {principal_id}.", flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--delete", action="store_true")
     parser.add_argument("--gateway-id", required=True)
     parser.add_argument("--principal-id", required=True)
-    parser.add_argument("--principal-type", required=True)
-    parser.add_argument("--role", required=True)
+    parser.add_argument("--principal-type")
+    parser.add_argument("--role")
     parser.add_argument("--tenant-id")
     parser.add_argument("--client-id")
     args = parser.parse_args()
 
     try:
-        ensure_assignment(
-            args.gateway_id,
-            args.principal_id,
-            args.principal_type,
-            args.role,
-            args.tenant_id,
-            args.client_id,
-        )
+        if args.delete:
+            delete_assignment(args.gateway_id, args.principal_id, args.tenant_id, args.client_id)
+        else:
+            if not args.principal_type or not args.role:
+                raise ValueError("--principal-type and --role are required unless --delete is used.")
+            ensure_assignment(
+                args.gateway_id,
+                args.principal_id,
+                args.principal_type,
+                args.role,
+                args.tenant_id,
+                args.client_id,
+            )
     except Exception as error:
         print(error, file=sys.stderr, flush=True)
         return 1
