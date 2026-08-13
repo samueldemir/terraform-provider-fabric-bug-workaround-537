@@ -1,6 +1,7 @@
 
-# NOTE: YOu can run the script locally by adding the required PARAMS
-
+# NOTE: This is not really a test. But you can test it locally by running python and check online
+# on https://app.powerbi.com/groups/me/gateways?experience=power-bi
+# Please fill the VARIABLES below for running.
 from ensure_fabric_gateway_role_assignment import ensure_assignment
 
 
